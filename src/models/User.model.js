@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
+const bcrypt = require('bcrypt')
 
 const userSchema = new mongoose.Schema({
   fullname: {
     type: String,
     required: true,
-    unique: true,
     trim:true
   },
   email: {
@@ -21,7 +21,8 @@ const userSchema = new mongoose.Schema({
     type:String,
     required:function(){
         return !this.googleId // if googleId not then password is required
-    }
+    },
+    select: false
   },
   // 👉 Google OAuth Support
     googleId: {
@@ -34,12 +35,6 @@ const userSchema = new mongoose.Schema({
       enum: ["user", "provider", "admin"],
       default: "user"
     },
-
-    avatar: {
-      type: String,
-      default: ""
-    },
-
     isVerified: {
       type: Boolean,
       default: false
@@ -52,14 +47,14 @@ const userSchema = new mongoose.Schema({
 
 
 // ✅ Password Hash Middleware
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
   if (!this.isModified("password") || !this.password) {
-    return next();
+   return;
   }
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
+  
 });
 
 
