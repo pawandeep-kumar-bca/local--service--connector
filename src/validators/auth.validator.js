@@ -1,6 +1,6 @@
 const { body, validationResult } = require("express-validator");
 
-const responseWithValidationErrors = (req, res, next) => {
+const respondWithValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -8,7 +8,7 @@ const responseWithValidationErrors = (req, res, next) => {
   next();
 };
 
-const registerValidation = [
+const registerUserValidation = [
   body("fullname")
     .notEmpty()
     .withMessage("Fullname is required")
@@ -34,9 +34,20 @@ const registerValidation = [
     .isIn(["user", "provider", "admin"])
     .withMessage("Invalid role"),
 
-  responseWithValidationErrors
+  respondWithValidationErrors,
+];
+
+const loginUserValidation = [
+  body("email").notEmpty().withMessage("email is required").isEmail().withMessage("Invalid email address"),
+  body("password")
+  .notEmpty().withMessage("password is required")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long"),
+     respondWithValidationErrors
+  
 ];
 
 module.exports = {
-  registerValidation
+  registerUserValidation,
+  loginUserValidation
 };
