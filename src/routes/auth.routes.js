@@ -11,5 +11,7 @@ const router = express.Router()
 router.post('/register',authValidator.registerUserValidation,authController.registerUser)
 
 router.post('/login',authValidator.loginUserValidation,authController.loginUser)
+router.post('/refresh-token',authController.refreshToken)
 
+router.post('/logout',authController.logoutUser)
 module.exports = router

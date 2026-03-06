@@ -24,6 +24,10 @@ const userSchema = new mongoose.Schema({
     },
     select: false
   },
+  refreshToken:{
+    type:String,
+   
+  },
   // 👉 Google OAuth Support
     googleId: {
       type: String,
