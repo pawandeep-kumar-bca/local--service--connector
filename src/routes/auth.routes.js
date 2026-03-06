@@ -1,6 +1,9 @@
 const express = require('express')
 const authController = require('../controllers/auth.controller')
 const authValidator = require('../validators/auth.validator')
+
+
+const authMiddleware = require('../middlewares/auth.middleware')
 const router = express.Router()
 
 
@@ -14,4 +17,6 @@ router.post('/login',authValidator.loginUserValidation,authController.loginUser)
 router.post('/refresh-token',authController.refreshToken)
 
 router.post('/logout',authController.logoutUser)
+
+router.get('/me',authMiddleware.tokenVerify,authController.me)
 module.exports = router

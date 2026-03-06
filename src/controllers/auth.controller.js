@@ -178,22 +178,48 @@ return res.status(200).json({message:"User logged out successfully"})
 }
 
 
+async function me(req, res) {
+try {const userId = req.user
+ if(!userId){
+  return res.status(401).json({message:"Unauthorized"})
+ }
+ const user = await userModel.findById(userId).select("-password")
+
+ 
+ if(!user){
+  return res.status(401).json({message:"Unauthorized"})
+ }
+ return res.status(200).json({
+  message: "User fetched successfully",
+  email:user.email,
+  role:user.role
+  
+})}catch(err){
+  console.error("logged in error:",err);
+  
+  return res.status(500).json({message:'Internal server error'})
+ }
+}
 
 
 
-async function me(req, res) {}
+
+
 async function verifyEmail(req, res) {}
 
 async function forgotPassword(req, res) {}
 
-async function resetPassword(req, res) {}
+async function resetPassword(req, res) {
+
+}
 
 module.exports = {
   registerUser,
   loginUser,
   refreshToken,
+  logoutUser,
+  me,
   verifyEmail,
   forgotPassword,
   resetPassword,
-  logoutUser,
 };
