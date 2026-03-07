@@ -19,4 +19,7 @@ router.post('/refresh-token',authController.refreshToken)
 router.post('/logout',authController.logoutUser)
 
 router.get('/me',authMiddleware.tokenVerify,authController.me)
+
+router.get('/verify-email/:token',authController.verifyEmail)
+
 module.exports = router

@@ -1,10 +1,11 @@
 
 const userModel = require("../models/User.model");
 const jwt = require("jsonwebtoken");
-
+const crypto = require('crypto');
+const sendEmail  = require('../utils/sendEmail')
 async function registerUser(req, res) {
   try {
-    const { fullname, email, password, role } = req.body;
+    const { fullname, email, password, role} = req.body;
 
     const isUserAlreadyExists = await userModel.findOne({ email });
 
@@ -18,22 +19,34 @@ async function registerUser(req, res) {
       password,
       role: role || "user",
     });
+    const emailVerify = crypto.randomBytes(16).toString("hex")
+    
+    user.emailVerificationToken = emailVerify
+    user.emailVerificationExpires = Date.now() + 10 * 60 * 1000
+    await user.save()
 
-    const token = jwt.sign(
-      {
-        id: user._id,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" },
-    );
+    sendEmail(
+    // `${process.env.EMAIL_USER}`,
+  `${user.email}`,
+  '<p>Verify Your Email</p>',
+  '<p>Please click the link below to verify your email:</p>',
+  `<a href=http://localhost:3000/api/v1/auth/verify-email/${emailVerify}>Verify Email</a>`
+);
+    // const token = jwt.sign( 
+    //   {
+    //     id: user._id,
+    //     role: user.role,
+    //   },
+    //   process.env.JWT_SECRET,
+    //   { expiresIn: "1d" },
+    // );
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+    // res.cookie("token", token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: "strict",
+    //   maxAge: 24 * 60 * 60 * 1000,
+    // });
 
     res.status(201).json({
       message: "User registered successfully",
@@ -42,6 +55,8 @@ async function registerUser(req, res) {
         fullname: user.fullname,
         email: user.email,
         role: user.role,
+        emailVerificationToken:user.emailVerificationToken,
+       emailVerificationExpires: user.emailVerificationExpires
       },
     });
   } catch (err) {
@@ -59,6 +74,9 @@ async function loginUser(req, res) {
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
+    if(!user.isVerified){
+ return res.status(403).json({message:"Please verify your email first"})
+}
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
@@ -204,8 +222,36 @@ try {const userId = req.user
 
 
 
+ 
 
-async function verifyEmail(req, res) {}
+async function verifyEmail(req, res) {
+ try{
+  const token = req.params.token
+
+  
+  const user = await userModel.findOne({emailVerificationToken:token})
+  if(!user){
+    return res.status(404).json({message:'Invalid or expired verification token'})
+  }
+  if(user.emailVerificationExpires < Date.now()){
+    return res.status(400).json({message:"Verification token expired"})
+  }
+  user.emailVerificationToken  = null
+  user.emailVerificationExpires = null
+  user.isVerified = true
+  await user.save()
+ return  res.status(200).json({message:"Email verified successfully",
+    email:user.email
+
+  })
+
+ }catch(err){
+  console.error("Email verify error:",err);
+  return res.status(500).json({message:"Internal server error"})
+  
+ }
+
+}
 
 async function forgotPassword(req, res) {}
 
