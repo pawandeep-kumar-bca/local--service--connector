@@ -48,6 +48,12 @@ const userSchema = new mongoose.Schema({
     },
     emailVerificationExpires:{
       type:String
+    },
+    passwordResetToken:{
+      type:String
+    },
+    passwordResetExpires:{
+      type:String
     }
   },
   {

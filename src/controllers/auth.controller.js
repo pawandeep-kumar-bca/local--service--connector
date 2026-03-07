@@ -30,7 +30,7 @@ async function registerUser(req, res) {
   `${user.email}`,
   '<p>Verify Your Email</p>',
   '<p>Please click the link below to verify your email:</p>',
-  `<a href=http://localhost:3000/api/v1/auth/verify-email/${emailVerify}>Verify Email</a>`
+  `<a href='http://localhost:3000/api/v1/auth/verify-email/${emailVerify}'>Verify Email</a>`
 );
     // const token = jwt.sign( 
     //   {
@@ -240,10 +240,11 @@ async function verifyEmail(req, res) {
   user.emailVerificationExpires = null
   user.isVerified = true
   await user.save()
- return  res.status(200).json({message:"Email verified successfully",
-    email:user.email
+  return res.redirect("http://localhost:3000/login")
+  //   return  res.status(200).json({message:"Email verified successfully",
+  //   email:user.email
 
-  })
+  // })
 
  }catch(err){
   console.error("Email verify error:",err);
@@ -253,10 +254,72 @@ async function verifyEmail(req, res) {
 
 }
 
-async function forgotPassword(req, res) {}
+async function forgotPassword(req, res) {
+ try{const { email } = req.body
+ const userExists = await userModel.findOne({email})
+
+ if(!userExists){
+  return res.status(200).json({message:"If the email exists, a reset link has been sent"})
+ }
+ const resetPasswordToken = crypto.randomBytes(16).toString('hex')
+ userExists.passwordResetToken = resetPasswordToken;
+ userExists.passwordResetExpires = Date.now() + 10 * 60 * 1000
+ await userExists.save()
+  sendEmail(
+    // `${process.env.EMAIL_USER}`,
+  `${userExists.email}`,
+  "<p>Reset your password</p>",
+  "<p>Click the link below to reset your password:</p>",
+  `<a href='http://localhost:3000/api/v1/auth/reset-password/${resetPasswordToken}'>reset password</a>`
+
+
+);
+
+return res.status(200).json({message:"Password reset link sent to your email",
+  passwordResetToken:userExists.passwordResetToken
+})
+}catch(err){
+  console.error('forgot password error:',err);
+  return res.status(500).json({message:'Internal server error'})
+  
+ }
+}
 
 async function resetPassword(req, res) {
 
+  try{
+    const { password } = req.body
+  if(!password){
+ return res.status(400).json({message:"Password is required"})
+}
+if(password.length < 6){
+ return res.status(400).json({message:"Password must be at least 6 characters"})
+}
+
+  const token = req.params.token
+
+
+  const userExists = await userModel.findOne({passwordResetToken:token})
+if(!userExists){
+  return res.status(400).json({message:"Invalid or expired reset token"})
+}
+  if(userExists.passwordResetExpires < Date.now()){
+    return res.status(400).json({message:'invalid  or expired  reset token'})
+  }
+  
+
+
+  userExists.password = password
+userExists.passwordResetToken =null
+ userExists.passwordResetExpires = null
+ await userExists.save()
+ return res.status(200).json({ message:"Password reset successfully"
+})
+}catch(err){
+   console.error('reset password error:',err);
+    return res.status(500).json({message:'Internal server error'})
+  
+}
 }
 
 module.exports = {
