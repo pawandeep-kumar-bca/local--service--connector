@@ -1,3 +1,6 @@
+const userModel = require('../models/User.model')
+const bookingsModel = require('../models/booking.model')
+
 async function userBookings(req,res){
  try{
 
