@@ -2,13 +2,26 @@ const jwt = require("jsonwebtoken");
 
 async function tokenVerify(req, res, next) {
   try {
-    const token = req.headers.authorization.split(" ")[1];
-if (!token) {
+    const token = req.headers.authorization;
+
+    if (!token) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET)
 
-    req.user = decoded.id;
+    const parts = token.split(" ");
+
+    if (parts.length < 2) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const tokenExists = parts[1];
+
+    const decoded = jwt.verify(tokenExists, process.env.JWT_ACCESS_SECRET);
+
+    req.user = {
+      id: decoded.id,
+      role: decoded.role
+    };
 
     next();
   } catch (err) {
