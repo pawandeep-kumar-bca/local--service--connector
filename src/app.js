@@ -10,14 +10,14 @@ app.use(cookieParser())
 const authRoutes = require('./routes/auth.routes')
 const userRoutes = require('./routes/user.routes')
 const adminRoutes = require('./routes/admin.routes')
+const providerRoutes = require('./routes/provider.routes')
 // const bookingRoutes = require('./routes/booking.routes')
-// const providerRoutes = require('./routes/provider.routes')
   
 app.use('/api/v1/auth',authRoutes)
 app.use('/api/v1/users',userRoutes)
 app.use('/api/v1/categories',adminRoutes)
+app.use('/api/v1/providers',providerRoutes)
 // app.use('/api/v1',bookingRoutes)
-// app.use('/api/v1/providers',providerRoutes)
 
 
 module.exports = app

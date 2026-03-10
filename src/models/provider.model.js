@@ -1,49 +1,88 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
-
-const providerSchema = new mongoose.Schema({
-    providerName:{
-        type:String,
-        required:true
+const providerSchema = new mongoose.Schema(
+  {
+    providerName: {
+      type: String,
+      required: true,
     },
-    phoneNumber:{
-        type:String,
-        required:true
+    phoneNumber: {
+      type: String,
+      required: true,
     },
-    price:{
-        type:Number,
-        required:true
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+      required: true,
+      unique:true
     },
-    serviceType:{
-        type:String,
-        required:true
+    price: {
+      type: Number,
+      required: true,
     },
-    experience:{
-        type:Number,
-        required:true
+    experience: {
+      type: Number,
+      required: true,
     },
-    city:{
-        type:String,
-        required:true
+    city: {
+      type: String,
+      required: true,
     },
-    documents:{
-        aadharCard:{
-            type:Image,
-            required:true
+    documents: {
+      aadharCard: {
+        url:{
+          type: String,
+        required: true,
         },
-        certificate:{
-            type:Image,
-            required:true
-        }
-    },
-    profileImage:{
-        type:Image
+      fileId: {
+        type: String,
+      }
         
-    }
-})
+      },
+      certificate: {
+         url:{
+          type: String,
+        required: true,
+        },
+      fileId: {
+        type: String,
+      }
+      },
+    },
+    profileImage: {
+      url: {
+        type: String,
+      },
+      fileId: {
+        type: String,
+      },
+    },
+    verificationStatus: {
+      type: String,
+      enum: ["verified", "not verified"],
+      default: "not verified",
+    },
+    status: {
+      type: String,
+      enum: ["Pending", "Approved", "Rejected"],
+      default: "Pending",
+    },
+    rating: {
+      type: Number,
+      default: 0,
+    },
+    totalReview: {
+      type: Number,
+      default: 0,
+    },
+    availability: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  { timestamps: true },
+);
 
+const providerModel = new mongoose.model("Provider", providerSchema);
 
-const providerModel= new mongoose.model('Provider',providerSchema)
-
-
-module.exports = providerModel
+module.exports = providerModel;
