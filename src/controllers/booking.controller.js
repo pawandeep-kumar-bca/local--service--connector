@@ -77,7 +77,7 @@ async function userBookingCreate(req, res) {
   }
 }
 
-async function getUserBookingCreate(req,res){
+async function getUserAllBooking(req,res){
  try{const userId = req.user.id
 
  const allBookings = await bookingsModel
@@ -96,7 +96,25 @@ async function getUserBookingCreate(req,res){
     
 }
 }
+async function getUserOneBooking(req,res){
 
+   try{ const bookingId = req.params.id
+    const userId = req.user.id
+    const booking = await bookingsModel.findById(bookingId).populate(
+    "providerId",
+    "providerName phoneNumber price city profileImage status rating totalReview availability"
+  ).populate('serviceId','name').lean()
+    if(!booking){
+        return res.status(404).json({message:'booking not found'})
+    }
+    if(booking.userId.toString() !== userId){
+        return res.status(403).json({message:'forbidden'})
+    }
+    return res.status(200).json({message:'user booking fetch successfully',booking})}catch(err){
+        console.error('user get one booking error:',err);
+        return res.status(500).json({message:'Internal server error'})
+    }
+}
 module.exports = {
-  userBookingCreate,getUserBookingCreate
+  userBookingCreate,getUserAllBooking, getUserOneBooking
 };

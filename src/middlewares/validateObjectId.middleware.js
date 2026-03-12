@@ -3,8 +3,8 @@ const mongoose = require('mongoose')
 
 async function validateObjectId(req,res,next){
     try{
-        const providerId  = req.params.id
-        if(!mongoose.Types.ObjectId.isValid(providerId)){
+        const Id  = req.params.id
+        if(!mongoose.Types.ObjectId.isValid(Id)){
          return res.status(400).json({message:'Invalid provider id'})
          }
          next()
