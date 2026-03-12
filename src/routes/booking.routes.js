@@ -15,9 +15,11 @@ router.get('/',authMiddleware.tokenVerify,bookingController.getUserAllBooking)
 // GET    /api/v1/bookings/:id
 router.get('/:id',authMiddleware.tokenVerify,validateObjectId,bookingController.getUserOneBooking)
 // PUT    /api/v1/bookings/:id/accept 
-router.get('/:id/accept',authMiddleware.tokenVerify,bookingController.providerAcceptBooking)
+router.put('/:id/accept',authMiddleware.tokenVerify,bookingController.providerAcceptBooking)
 // PUT    /api/v1/bookings/:id/reject
-router.get('/:id/reject',authMiddleware.tokenVerify,bookingController.providerRejectBooking)
+router.put('/:id/reject',authMiddleware.tokenVerify,bookingController.providerRejectBooking)
 // PUT    /api/v1/bookings/:id/start
-router.get('/:id/start',authMiddleware.tokenVerify,bookingController.providerStartBooking)
+router.put('/:id/start',authMiddleware.tokenVerify,bookingController.providerStartBooking)
+// PUT    /api/v1/bookings/:id/complete 
+router.put('/:id/complete',authMiddleware.tokenVerify,bookingController.providerCompletedBooking)
 module.exports = router

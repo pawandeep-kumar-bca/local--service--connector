@@ -249,6 +249,45 @@ async function providerStartBooking(req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+
+async function providerCompletedBooking(req, res) {
+  try {
+    const userId = req.user.id;
+    const bookingId = req.params.id;
+    const provider = await providerModel.findOne({
+      userId: userId,
+    });
+    if (!provider) {
+      return res.status(404).json({ message: "Provider not found" });
+    }
+    const providerId = provider._id;
+
+    const booking = await bookingsModel.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+    if (booking.providerId.toString() !== providerId.toString()) {
+      return res.status(403).json({ message: "forbidden" });
+    }
+    if (booking.bookingStatus !== "Start") {
+      return res.status(400).json({ message: "Invalid booking status" });
+    }
+    
+
+    booking.bookingStatus = "Completed";
+    await booking.save();
+
+    return res
+      .status(200)
+      .json({ message: "Booking completed successfully", booking });
+  } catch (err) {
+    console.error("booking completed error:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+
+
 module.exports = {
   userBookingCreate,
   getUserAllBooking,
@@ -256,4 +295,5 @@ module.exports = {
   providerAcceptBooking,
   providerRejectBooking,
   providerStartBooking,
+  providerCompletedBooking
 };
