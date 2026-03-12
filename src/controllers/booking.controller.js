@@ -286,6 +286,35 @@ async function providerCompletedBooking(req, res) {
   }
 }
 
+async function userBookingCancel(req, res) {
+  try {
+    const userId = req.user.id;
+    const bookingId = req.params.id;
+
+    const booking = await bookingsModel.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+    if (booking.userId.toString() !== userId.toString()) {
+      return res.status(403).json({ message: "forbidden" });
+    }
+    if (booking.bookingStatus !== "Pending" && booking.bookingStatus !== "Accepted") {
+      return res.status(400).json({ message: "Invalid booking status" });
+    }
+    
+
+    booking.bookingStatus = "Cancelled";
+    await booking.save();
+
+    return res
+      .status(200)
+      .json({ message: "Booking cancelled successfully", booking });
+  } catch (err) {
+    console.error("booking completed error:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 
 
 module.exports = {
@@ -295,5 +324,6 @@ module.exports = {
   providerAcceptBooking,
   providerRejectBooking,
   providerStartBooking,
-  providerCompletedBooking
+  providerCompletedBooking,
+  userBookingCancel
 };

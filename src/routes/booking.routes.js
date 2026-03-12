@@ -22,4 +22,6 @@ router.put('/:id/reject',authMiddleware.tokenVerify,bookingController.providerRe
 router.put('/:id/start',authMiddleware.tokenVerify,bookingController.providerStartBooking)
 // PUT    /api/v1/bookings/:id/complete 
 router.put('/:id/complete',authMiddleware.tokenVerify,bookingController.providerCompletedBooking)
+// PUT    /api/v1/bookings/:id/cancel
+router.put('/:id/cancel',authMiddleware.tokenVerify,bookingController.userBookingCancel)
 module.exports = router
