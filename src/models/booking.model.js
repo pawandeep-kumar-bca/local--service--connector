@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const bookingsSchema = new mongoose.Schema({
   providerId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId, 
     ref: "provider",
     required: true,
   },
@@ -12,8 +12,9 @@ const bookingsSchema = new mongoose.Schema({
    required:true
 },
   serviceId: {
-    type: String,
-    required: true,
+     type:mongoose.Schema.Types.ObjectId,
+     ref:'category',
+     required: true,
   },
   bookingDate: {
     type:Date,
@@ -25,7 +26,7 @@ const bookingsSchema = new mongoose.Schema({
   },
   bookingStatus: {
     type: String,
-    enum: ["Pending", "Accepted", "Cancelled", "Completed"],
+    enum: ["Start","Pending","Reject", "Accepted", "Cancelled", "Completed"],
     default: "Pending",
   },
   serviceAddress: {
