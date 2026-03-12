@@ -132,13 +132,13 @@ async function providerAcceptBooking(req, res) {
     const userId = req.user.id;
     const bookingId = req.params.id;
     const provider = await providerModel.findOne({
-      userId: userId
+      userId: userId,
     });
-    if(!provider){
-        return res.status(404).json({message:'Provider not found'})
+    if (!provider) {
+      return res.status(404).json({ message: "Provider not found" });
     }
     const providerId = provider._id;
-   
+
     const booking = await bookingsModel.findById(bookingId);
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
@@ -153,8 +153,8 @@ async function providerAcceptBooking(req, res) {
       providerId,
       bookingSlot: booking.bookingSlot,
       bookingDate: booking.bookingDate,
-      bookingStatus:  "Accepted" ,
-      _id:{$ne:bookingId}
+      bookingStatus: "Accepted",
+      _id: { $ne: bookingId },
     });
     if (bookingSlotAlready) {
       return res.status(409).json({ message: "Booking slot already booked" });
@@ -175,13 +175,13 @@ async function providerRejectBooking(req, res) {
     const userId = req.user.id;
     const bookingId = req.params.id;
     const provider = await providerModel.findOne({
-      userId: userId
+      userId: userId,
     });
-    if(!provider){
-        return res.status(404).json({message:'Provider not found'})
+    if (!provider) {
+      return res.status(404).json({ message: "Provider not found" });
     }
     const providerId = provider._id;
-   
+
     const booking = await bookingsModel.findById(bookingId);
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
@@ -204,18 +204,18 @@ async function providerRejectBooking(req, res) {
   }
 }
 
-async function providerStartBooking(req,res) {
-    try {
+async function providerStartBooking(req, res) {
+  try {
     const userId = req.user.id;
     const bookingId = req.params.id;
     const provider = await providerModel.findOne({
-      userId: userId
+      userId: userId,
     });
-    if(!provider){
-        return res.status(404).json({message:'Provider not found'})
+    if (!provider) {
+      return res.status(404).json({ message: "Provider not found" });
     }
     const providerId = provider._id;
-   
+
     const booking = await bookingsModel.findById(bookingId);
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
@@ -226,14 +226,19 @@ async function providerStartBooking(req,res) {
     if (booking.bookingStatus !== "Accepted") {
       return res.status(400).json({ message: "Invalid booking status" });
     }
-    const currentDate = new Date(booking.bookingDate)
-    if( currentDate !== Date.now()){
-        return res.status(400).json({message:'Booking date is not today',
-            booking.bookingStatus:'Reject'
-        })
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const bookingDate = new Date(booking.bookingDate);
+    bookingDate.setHours(0, 0, 0, 0);
+
+    if (bookingDate.getTime() !== today.getTime()) {
+      return res.status(400).json({
+        message: "Booking date is not today",
+      });
     }
-    
-    booking.bookingStatus = "Accepted";
+
+    booking.bookingStatus = "Start";
     await booking.save();
 
     return res
@@ -250,5 +255,5 @@ module.exports = {
   getUserOneBooking,
   providerAcceptBooking,
   providerRejectBooking,
-  providerStartBooking
+  providerStartBooking,
 };
