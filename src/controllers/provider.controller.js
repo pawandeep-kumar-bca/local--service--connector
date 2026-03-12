@@ -355,6 +355,7 @@ async function uploadProviderDocuments(req, res) {
   }
 }
 
+
 module.exports = {
   createProvider,
   getProvider,
@@ -364,5 +365,5 @@ module.exports = {
   nearbySearchLocation,
   recommendedProviders,
   availabilityProvider,
-  uploadProviderDocuments
+  uploadProviderDocuments,
 };
