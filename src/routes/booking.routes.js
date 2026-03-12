@@ -16,4 +16,8 @@ router.get('/',authMiddleware.tokenVerify,bookingController.getUserAllBooking)
 router.get('/:id',authMiddleware.tokenVerify,validateObjectId,bookingController.getUserOneBooking)
 // PUT    /api/v1/bookings/:id/accept 
 router.get('/:id/accept',authMiddleware.tokenVerify,bookingController.providerAcceptBooking)
+// PUT    /api/v1/bookings/:id/reject
+router.get('/:id/reject',authMiddleware.tokenVerify,bookingController.providerRejectBooking)
+// PUT    /api/v1/bookings/:id/start
+router.get('/:id/start',authMiddleware.tokenVerify,bookingController.providerStartBooking)
 module.exports = router
