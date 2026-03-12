@@ -77,6 +77,26 @@ async function userBookingCreate(req, res) {
   }
 }
 
+async function getUserBookingCreate(req,res){
+ try{const userId = req.user.id
+
+ const allBookings = await bookingsModel
+  .find({ userId })
+  .populate(
+    "providerId",
+    "providerName phoneNumber price city profileImage status rating totalReview availability"
+  )
+ if(allBookings.length === 0){
+    return res.status(200).json({message:'user bookings not found',allBookings:[]})
+ }
+ return res.status(200).json({message:'user bookings fetch successfully',allBookings})
+}catch(err){
+    console.error('Get all user booking error:',err);
+    return res.status(500).json({message:'Internal server error'})
+    
+}
+}
+
 module.exports = {
-  userBookingCreate,
+  userBookingCreate,getUserBookingCreate
 };

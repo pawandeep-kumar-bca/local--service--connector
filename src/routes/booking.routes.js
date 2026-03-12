@@ -7,6 +7,8 @@ const router = express.Router()
  
  
 
-router.post('/bookings',authMiddleware.tokenVerify,BookingValidation,bookingController.userBookingCreate)
+router.post('/',authMiddleware.tokenVerify,BookingValidation,bookingController.userBookingCreate)
+// GET    /api/v1/bookings
 
+router.get('/',authMiddleware.tokenVerify,bookingController.getUserBookingCreate)
 module.exports = router
