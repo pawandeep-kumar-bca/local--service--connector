@@ -68,8 +68,34 @@ async function providerReview(req,res){
 }
 }
 
+async function deleteReview(req,res) {
+try{   const reviewId= req.params.id
+    const userId = req.user.id
+   
+
+    if(!reviewId){
+        return res.status(400).json({message:'Invalid review Id'})
+    }
+    const reviewExists = await reviewModel.findById(reviewId)
+    if(!reviewExists){
+        return res.status(404).json({message:"review not found"})
+    }
+    if(reviewExists.userId.toString() !== userId.toString()){
+        return res.status(403).json({message:'Unauthorized'})
+    }
+    const deletedReview = await reviewModel.findByIdAndDelete(reviewId)
+
+    return res.status(200).json({message:'review deleted successfully',
+        deletedReview
+    })}catch(err){
+        console.error('Delete review error:',err);
+        return res.status(500).json({message:'internal server error'})
+        
+    }
+}
 
 module.exports= {
     reviewCreate,
-    providerReview
+    providerReview,
+    deleteReview
 }
