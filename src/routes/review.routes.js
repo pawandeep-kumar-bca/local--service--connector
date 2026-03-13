@@ -8,5 +8,9 @@ const router = express.Router()
 
 router.post('/',authMiddleware.tokenVerify,reviewController.reviewCreate)
 
+// GET    /api/v1/reviews/provider/:providerId 
+
+router.get('/provider/:providerId',)
+
 
 module.exports = router

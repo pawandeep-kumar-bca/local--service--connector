@@ -1,5 +1,6 @@
 const reviewModel = require('../models/review.model')
 const bookingModel = require('../models/booking.model')
+const providerModel = require('../models/provider.model')
 async function reviewCreate(req,res){
     try{const {rating,comment} = req.body
     const bookingId = req.params.id
@@ -41,9 +42,34 @@ async function reviewCreate(req,res){
     }
 }
 
+async function providerReview(req,res){
+ try{const providerId = req.params.providerId
 
+  if(!providerId){
+    return res.status(400).json({message:'providerId is missing'})
+  }
+  const reviews = await reviewModel.find({providerId:providerId}).populate('userId','name')
+
+  if(reviews.length === 0){
+    return res.status(200).json({
+        message:'reviews not found',
+       reviews:[]
+    })
+  }
+  return res.status(200).json({message:'provider review fetch successfully',
+    providerId,
+    totalReview:reviews.length,
+    reviews
+  })
+}catch(err){
+    console.error('provider review error:',err);
+    return res.status(500).json({message:'Internal server error'})
+    
+}
+}
 
 
 module.exports= {
-    reviewCreate
+    reviewCreate,
+    providerReview
 }
