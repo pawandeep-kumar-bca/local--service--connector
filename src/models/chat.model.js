@@ -5,8 +5,7 @@ const chatSchema = new mongoose.Schema(
     bookingId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "booking",
-      required: true,
-      index: true
+      required: true
     },
 
     senderId: {
@@ -36,9 +35,13 @@ const chatSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     }
+
   },
   { timestamps: true }
 );
+
+chatSchema.index({ bookingId: 1, createdAt: 1 });
+chatSchema.index({ receiverId: 1, isRead: 1 });
 
 const chatModel = mongoose.model("chat", chatSchema);
 

@@ -1,16 +1,23 @@
 const chatModel = require("../models/chat.model");
 const bookingModel = require("../models/booking.model");
 
-async function chatMessagesRead(req, res) {
+async function chatMessages(req, res) {
+
   try {
+
     const bookingId = req.params.bookingId;
     const userId = req.userId;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+
+    const skip = (page - 1) * limit;
 
     const booking = await bookingModel.findById(bookingId);
 
     if (!booking) {
       return res.status(404).json({
-        message: "booking not found",
+        message: "booking not found"
       });
     }
 
@@ -19,64 +26,69 @@ async function chatMessagesRead(req, res) {
       userId !== booking.providerId.toString()
     ) {
       return res.status(403).json({
-        message: "forbidden",
+        message: "forbidden"
       });
     }
+
+    const chats = await chatModel
+      .find({ bookingId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return res.status(200).json({
+      message: "chats fetched successfully",
+      chats
+    });
+
+  } catch (err) {
+
+    console.error("chat messages error:", err);
+
+    return res.status(500).json({
+      message: "internal server error"
+    });
+
+  }
+
+}
+
+async function chatMessagesRead(req, res) {
+
+  try {
+
+    const bookingId = req.params.bookingId;
+    const userId = req.userId;
 
     const result = await chatModel.updateMany(
       {
-        bookingId: bookingId,
-        isRead: false,
+        bookingId,
+        receiverId: userId,
+        isRead: false
       },
       {
-        $set: { isRead: true },
-      },
+        $set: { isRead: true }
+      }
     );
 
     return res.status(200).json({
-      message: "chat messages marked as read",
-      updatedMessages: result.modifiedCount,
+      message: "messages marked as read",
+      updatedMessages: result.modifiedCount
     });
+
   } catch (err) {
-    console.error("chat message read error:", err);
+
+    console.error("read messages error:", err);
 
     return res.status(500).json({
-      message: "Internal server error",
+      message: "internal server error"
     });
-  }
-}
 
-async function chatMessages(req, res) {
-  try {
-    const bookingId = req.params.bookingId;
-    const userId = req.userId;
-    const booking = await bookingModel.findById(bookingId);
-    if (!booking) {
-      return res.status(404).json({
-        message: "booking not found",
-        booking: [],
-      });
-    }
-    if (
-      userId !== booking.userId.toString() &&
-      userId !== booking.providerId.toString()
-    ) {
-      return res.status(403).json({ message: "forbidden" });
-    }
-    const chats = await chatModel
-      .find({ bookingId: bookingId })
-      .sort({ createdAt: 1 });
-    return res
-      .status(200)
-      .json({ message: "All chats fetched successfully", chats });
-  } catch (err) {
-    console.error("chat messages error:", err);
-
-    return res.status(500).json({ message: "Internal server error" });
   }
+
 }
 
 module.exports = {
   chatMessages,
-  chatMessagesRead,
+  chatMessagesRead
 };

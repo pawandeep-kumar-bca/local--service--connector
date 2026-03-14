@@ -13,4 +13,7 @@ router.get('/:bookingId/messages',authMiddleware.tokenVerify,ObjectIdMiddleware,
 
 // POST /api/v1/chats/:bookingId/read\
 router.post('/:bookingId/read',authMiddleware.tokenVerify,ObjectIdMiddleware,chatController.chatMessagesRead)
+
+
+
 module.exports = router
