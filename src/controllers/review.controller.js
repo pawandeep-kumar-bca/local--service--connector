@@ -1,6 +1,6 @@
 const reviewModel = require('../models/review.model')
 const bookingModel = require('../models/booking.model')
-const providerModel = require('../models/provider.model')
+
 async function reviewCreate(req,res){
     try{const {rating,comment} = req.body
     const bookingId = req.params.id
