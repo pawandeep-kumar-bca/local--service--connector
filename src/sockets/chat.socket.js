@@ -1,5 +1,6 @@
 const chatModel = require("../models/chat.model");
 const bookingModel = require("../models/booking.model");
+const notificationModel = require("../models/notification.model");
 
 const { addUser, removeUser, getUserSocket } = require("../utils/socketUsers");
 
@@ -12,7 +13,7 @@ function chatSocket(io) {
       addUser(userId, socket.id);
     });
 
-    // join booking room
+    // join booking chat room
     socket.on("joinChat", (bookingId) => {
       socket.join(bookingId);
     });
@@ -25,9 +26,9 @@ function chatSocket(io) {
         if (!messageText) return;
 
         const booking = await bookingModel.findById(bookingId);
-
         if (!booking) return;
 
+        // check sender is part of booking
         if (
           senderId !== booking.userId.toString() &&
           senderId !== booking.providerId.toString()
@@ -35,6 +36,7 @@ function chatSocket(io) {
           return;
         }
 
+        // save chat message
         const message = await chatModel.create({
           bookingId,
           senderId,
@@ -42,12 +44,25 @@ function chatSocket(io) {
           messageText,
         });
 
+        // emit message to chat room
         io.to(bookingId).emit("newMessage", message);
 
+        // create notification in DB
+        const notification = await notificationModel.create({
+          receiverId: receiverId,
+          senderId: senderId,
+          type: "new_message",
+          title: "New Message",
+          message: "You received a new message",
+          relatedId: bookingId,
+          relatedModel: "Chat",
+        });
+
+        // send real-time notification if receiver online
         const receiverSocket = getUserSocket(receiverId);
 
         if (receiverSocket) {
-          io.to(receiverSocket).emit("newNotification", message);
+          io.to(receiverSocket).emit("newNotification", notification);
         }
       } catch (err) {
         console.error("sendMessage socket error:", err);
@@ -88,7 +103,6 @@ function chatSocket(io) {
 
     socket.on("disconnect", () => {
       removeUser(socket.id);
-
       console.log("User disconnected:", socket.id);
     });
   });
