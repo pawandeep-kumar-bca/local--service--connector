@@ -1,6 +1,7 @@
 const express = require('express')
 const notificationController = require('../controllers/notification.controller')
 const authMiddleware = require('../middlewares/auth.middleware')
+const validateObjectId = require('../middlewares/validateObjectId.middleware')
 const router = express.Router()
 
 // POST /api/v1/notifications
@@ -10,6 +11,8 @@ router.post('/',authMiddleware.tokenVerify,notificationController.createNotifica
 // GET /api/v1/notifications
 router.get('/',authMiddleware.tokenVerify,notificationController.getAllNotification)
 
+// PATCH /api/v1/notifications/:id
 
+router.patch('/:id',authMiddleware.tokenVerify,validateObjectId,notificationController.readNotification)
 
 module.exports = router
