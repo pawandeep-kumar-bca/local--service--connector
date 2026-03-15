@@ -7,5 +7,6 @@ const router = express.Router()
 
 router.post('/create-order',authMiddleware.tokenVerify,paymentController.createOrder)
 
-
+// POST /api/v1/payments/verify
+router.post('/verify',authMiddleware.tokenVerify,paymentController.verifyOrder)
 module.exports = router
