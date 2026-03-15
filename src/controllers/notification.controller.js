@@ -72,6 +72,7 @@ async function getAllNotification(req, res) {
     });
   }
 }
+
 async function readNotification(req,res) {
     try{
         const userId = req.user.id
@@ -98,8 +99,39 @@ async function readNotification(req,res) {
         
     }
 }
+
+async function deleteNotification(req,res){
+try{
+        const userId = req.user.id
+        const notificationId = req.params.id
+
+        const notification =  await notificationModel.findById(notificationId)
+        if(!notification){
+            return res.status(404).json({message:'notification not found'
+            })
+        }
+        if(notification.receiverId.toString() !== userId){
+            return res.status(403).json({message:'forbidden'})
+        }
+        if(notification.isDeleted){
+            return res.status(200).json({message:'already deleted notification'})
+        }
+        if(!notification.isDeleted){
+            notification.isDeleted = true
+         await notification.save()
+        }
+        
+
+        return res.status(200).json({message:'notification deleted successfully'})
+    }catch(err){
+        console.error('delete notification error:',err);
+        return res.status(500).json({message:'Internal server error'})
+        
+    }
+}
 module.exports = {
   createNotification,
   getAllNotification,
-  readNotification
+  readNotification,
+  deleteNotification
 };

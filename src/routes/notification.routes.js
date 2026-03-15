@@ -15,4 +15,7 @@ router.get('/',authMiddleware.tokenVerify,notificationController.getAllNotificat
 
 router.patch('/:id',authMiddleware.tokenVerify,validateObjectId,notificationController.readNotification)
 
+// DELETE /api/v1/notifications/:id
+router.delete('/:id',authMiddleware.tokenVerify,validateObjectId,notificationController.deleteNotification)
+// GET /api/v1/notifications/unread-count
 module.exports = router
