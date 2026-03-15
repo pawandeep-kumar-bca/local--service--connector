@@ -1,5 +1,5 @@
 const express = require('express')
-const adminControllers = require('../controllers/admin.controller')
+const adminControllers = require('../controllers/category.controller')
 const providerMiddleware = require('../middlewares/auth.middleware')
 const roleBased = require('../middlewares/role.middleware')
 const routes = express.Router()

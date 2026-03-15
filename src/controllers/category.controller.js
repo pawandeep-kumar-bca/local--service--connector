@@ -51,6 +51,9 @@ async function getCategory(req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+
+
+
 async function updateCategory(req, res) {
   try {
     const { name, description, icon, status } = req.body;
@@ -100,6 +103,7 @@ async function updateCategory(req, res) {
     });
   }
 }
+
 async function deleteCategory(req, res) {
   try {
     const { id } = req.params;
