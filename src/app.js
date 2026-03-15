@@ -18,7 +18,7 @@ const providerRoutes = require('./routes/provider.routes')
 const bookingRoutes = require('./routes/booking.routes')
 const reviewRoutes = require('./routes/review.routes')
 const chatRoutes = require('./routes/chat.routes')
-
+const notificationRoutes = require('./routes/notification.routes')
 
 app.use('/api/v1/auth',authRoutes)
 app.use('/api/v1/users',userRoutes)
@@ -27,6 +27,6 @@ app.use('/api/v1/providers',providerRoutes)
 app.use('/api/v1/bookings',bookingRoutes)
 app.use('/api/v1/reviews',reviewRoutes)
 app.use('/api/v1/chats',chatRoutes)
-
+app.use('/api/vi/notification',notificationRoutes)
 
 module.exports = app
