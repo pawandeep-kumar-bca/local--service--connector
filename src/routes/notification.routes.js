@@ -7,6 +7,9 @@ const router = express.Router()
 
 router.post('/',authMiddleware.tokenVerify,notificationController.createNotification)
 
+// GET /api/v1/notifications
+router.get('/',authMiddleware.tokenVerify,notificationController.getAllNotification)
+
 
 
 module.exports = router
