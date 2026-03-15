@@ -2,6 +2,8 @@ const paymentModel = require('../models/payment.model')
 const bookingModel = require('../models/booking.model')
 const razorpay = require('../config/razorpay')
 const crypto = require("crypto");
+
+
 async function createOrder(req,res){
  try{
  const {bookingId}= req.body
@@ -110,7 +112,100 @@ async function verifyOrder(req, res) {
 }
 
 
+async function razorpayWebhook(req, res) {
+  try {
+
+    const webhookSignature = req.headers["x-razorpay-signature"];
+
+    const body = JSON.stringify(req.body);
+
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET)
+      .update(body)
+      .digest("hex");
+
+    // verify webhook signature
+    if (expectedSignature !== webhookSignature) {
+      return res.status(400).json({
+        message: "Invalid webhook signature",
+      });
+    }
+
+    const event = req.body.event;
+
+    // payment success event
+    if (event === "payment.captured") {
+
+      const paymentEntity = req.body.payload.payment.entity;
+
+      const razorpayPaymentId = paymentEntity.id;
+      const razorpayOrderId = paymentEntity.order_id;
+      const paymentMethod = paymentEntity.method;
+
+      const payment = await paymentModel.findOne({ razorpayOrderId });
+
+      if (!payment) {
+        return res.status(404).json({
+          message: "Payment not found",
+        });
+      }
+
+      const booking = await bookingModel.findById(payment.bookingId);
+
+      // update payment
+      payment.paymentStatus = "success";
+      payment.razorpayPaymentId = razorpayPaymentId;
+      payment.paymentMethod = paymentMethod;
+
+      await payment.save();
+
+      // update booking
+      booking.paymentStatus = "success";
+      booking.bookingStatus = "confirmed";
+
+      await booking.save();
+    }
+
+    return res.status(200).json({
+      message: "Webhook processed successfully",
+    });
+
+  } catch (err) {
+    console.error("Webhook error:", err);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+}
+
+async function paymentHistory(req,res){
+  try { const userId = req.user.id
+
+    const page =parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const skip = (page - 1)*limit
+
+    const paymentHistory = await paymentModel.find({
+        userId:userId
+
+    }).sort({createdAt:-1}).limit(limit).skip(skip)
+
+    if(paymentHistory.length === 0){
+        return res.status(404).json({message:'payment history not found'})
+    }
+    return res.status(200).json({
+        message:'All payment history fetched successfully',
+        paymentHistory
+    })}catch(err){
+        console.error('payment history error:',err);
+        return res.status(500).json({message:'Internal server error'})
+        
+    }
+}
 module.exports = {
     createOrder,
-    verifyOrder
+    verifyOrder,
+    razorpayWebhook,
+    paymentHistory
 }

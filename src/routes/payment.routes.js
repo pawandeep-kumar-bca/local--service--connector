@@ -9,4 +9,9 @@ router.post('/create-order',authMiddleware.tokenVerify,paymentController.createO
 
 // POST /api/v1/payments/verify
 router.post('/verify',authMiddleware.tokenVerify,paymentController.verifyOrder)
+// POST /api/v1/payments/webhook   (Razorpay) 
+router.post('/webhook',paymentController.razorpayWebhook)
+
+// GET  /api/v1/payments/history
+router.get('/history',authMiddleware.tokenVerify,paymentController.paymentHistory)
 module.exports = router
