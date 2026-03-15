@@ -50,20 +50,21 @@ async function getAllNotification(req, res) {
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip(skip);
-     if(notifications.length === 0){
-        return res.status(200).json({message:'notification not found'
-            ,
-            notifications:[],
-            totalNotifications:notifications.length
-
-        })
-     }
+    if (notifications.length === 0) {
+      return res
+        .status(200)
+        .json({
+          message: "notification not found",
+          notifications: [],
+          totalNotifications: notifications.length,
+        });
+    }
     return res.status(200).json({
       message: "get all notification successfully",
       notifications,
-      totalNotifications:notifications.length,
-      page:page,
-      limit:limit
+      totalNotifications: notifications.length,
+      page: page,
+      limit: limit,
     });
   } catch (err) {
     console.error("get all notification error:", err);
@@ -73,65 +74,82 @@ async function getAllNotification(req, res) {
   }
 }
 
-async function readNotification(req,res) {
-    try{
-        const userId = req.user.id
-        const notificationId = req.params.id
+async function readNotification(req, res) {
+  try {
+    const userId = req.user.id;
+    const notificationId = req.params.id;
 
-        const notification =  await notificationModel.findById(notificationId)
-        if(!notification){
-            return res.status(404).json({message:'notification not found'
-            })
-        }
-        if(notification.receiverId.toString() !== userId){
-            return res.status(403).json({message:'forbidden'})
-        }
-        if(!notification.isRead){
-            notification.isRead = true
-        await notification.save()
-        }
-        
-
-        return res.status(200).json({message:'Notification marked as read',notification})
-    }catch(err){
-        console.error('read notification error:',err);
-        return res.status(500).json({message:'Internal server error'})
-        
+    const notification = await notificationModel.findById(notificationId);
+    if (!notification) {
+      return res.status(404).json({ message: "notification not found" });
     }
+    if (notification.receiverId.toString() !== userId) {
+      return res.status(403).json({ message: "forbidden" });
+    }
+    if (!notification.isRead) {
+      notification.isRead = true;
+      await notification.save();
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Notification marked as read", notification });
+  } catch (err) {
+    console.error("read notification error:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 }
 
-async function deleteNotification(req,res){
-try{
-        const userId = req.user.id
-        const notificationId = req.params.id
+async function deleteNotification(req, res) {
+  try {
+    const userId = req.user.id;
+    const notificationId = req.params.id;
 
-        const notification =  await notificationModel.findById(notificationId)
-        if(!notification){
-            return res.status(404).json({message:'notification not found'
-            })
-        }
-        if(notification.receiverId.toString() !== userId){
-            return res.status(403).json({message:'forbidden'})
-        }
-        if(notification.isDeleted){
-            return res.status(200).json({message:'already deleted notification'})
-        }
-        if(!notification.isDeleted){
-            notification.isDeleted = true
-         await notification.save()
-        }
-        
-
-        return res.status(200).json({message:'notification deleted successfully'})
-    }catch(err){
-        console.error('delete notification error:',err);
-        return res.status(500).json({message:'Internal server error'})
-        
+    const notification = await notificationModel.findById(notificationId);
+    if (!notification) {
+      return res.status(404).json({ message: "notification not found" });
     }
+    if (notification.receiverId.toString() !== userId) {
+      return res.status(403).json({ message: "forbidden" });
+    }
+    if (notification.isDeleted) {
+      return res.status(200).json({ message: "already deleted notification" });
+    }
+    if (!notification.isDeleted) {
+      notification.isDeleted = true;
+      await notification.save();
+    }
+
+    return res
+      .status(200)
+      .json({ message: "notification deleted successfully" });
+  } catch (err) {
+    console.error("delete notification error:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+async function unreadNotification(req, res) {
+  try {
+    const userId = req.user.id;
+    const unreadCount = await notificationModel.countDocuments({
+      receiverId: userId,
+      isRead: false,
+      isDeleted: false,
+    });
+    return res.status(200).json({
+      message: "unread notifications count fetched successfully",
+      unreadCount: unreadCount,
+    });
+  } catch (err) {
+    console.error("unread notification error:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 }
 module.exports = {
   createNotification,
   getAllNotification,
   readNotification,
-  deleteNotification
+  deleteNotification,
+  unreadNotification,
 };
